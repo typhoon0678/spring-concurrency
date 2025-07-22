@@ -5,7 +5,7 @@
 ## 시나리오
 
 - 3개의 서버를 띄우고, 티켓 수를 1 감소시키는 총 300번의 request를 전송
-[서버 구성](./readme-image/Spring%20동시성%20테스트.png)
+![서버 구성](./readme-image/Spring%20동시성%20테스트.png)
 
 - 프로젝트 루트 경로에서 실행 (Spring 빌드 + Redis 초기화 + 3개 서버 스케일링)
 ```shell
@@ -24,6 +24,8 @@ k6 run -e TICKET_NAME=test3 -e API_VERSION=v3 script.js
 k6 run -e TICKET_NAME=test4 -e API_VERSION=v4 script.js
 k6 run -e TICKET_NAME=test5 -e API_VERSION=v5 script.js
 ```
+
+- [TicketService](./src/main/java/dev/typhoon/spring_concurrency/service/TicketService.java)
 
 ## 결과
 
