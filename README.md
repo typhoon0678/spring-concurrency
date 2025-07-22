@@ -25,7 +25,9 @@ k6 run -e TICKET_NAME=test4 -e API_VERSION=v4 script.js
 k6 run -e TICKET_NAME=test5 -e API_VERSION=v5 script.js
 ```
 
+## 구현
 - [TicketService](./src/main/java/dev/typhoon/spring_concurrency/service/TicketService.java)
+- [TicketRepository](./src/main/java/dev/typhoon/spring_concurrency/repository/TicketRepository.java)
 
 ## 결과
 
