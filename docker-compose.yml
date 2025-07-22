@@ -1,0 +1,63 @@
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: concurrency_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d concurrency_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+# redis 초기 데이터 (test4, test5)
+  redis-init:
+    image: redis:8-alpine
+    container_name: redis-init
+    depends_on:
+      - redis
+    command: >
+      sh -c "
+        echo 'Redis 서버 시작 대기중...' &&
+        until redis-cli -h redis ping > /dev/null 2>&1; do
+          sleep 1
+        done &&
+        echo 'Redis 초기 데이터 설정 시작...' &&
+        redis-cli -h redis SET 'ticket:count:test4' 300 &&
+        redis-cli -h redis SET 'ticket:count:test5' 300 &&
+      "
+    profiles:
+      - init
+
+  app:
+    build: .
+    image: spring-concurrency-app
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/concurrency_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    ports:
+      - "8081-8083:8080"
+
+volumes:
+  postgres-data:
